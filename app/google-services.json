@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "702070012323",
+    "project_id": "cybersafe-30bca",
+    "storage_bucket": "cybersafe-30bca.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:702070012323:android:6cabffbb5ff7d5e06cc216",
+        "android_client_info": {
+          "package_name": "com.uri.phishguard"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCX2nCQdEBjAmoGf_6AfBjfLyFKobFnBBo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#1A1A2E</color>
+    <color name="colorOnPrimary">#FFFFFF</color>
+    <color name="colorSurface">#16213E</color>
+    <color name="colorOnSurface">#E0E0E0</color>
+    <color name="colorBackground">#0F3460</color>
+    <color name="neonGreen">#00FF88</color>
+    <color name="warningOrange">#FF8C00</color>
+    <color name="dangerRed">#FF1744</color>
+    <color name="cardBackground">#1E1E2E</color>
+    <color name="textPrimary">#FFFFFF</color>
+    <color name="textSecondary">#A0A0B0</color>
+    <color name="chipSafe">#00FF88</color>
+    <color name="chipSuspicious">#FF8C00</color>
+    <color name="chipDangerous">#FF1744</color>
+</resources>

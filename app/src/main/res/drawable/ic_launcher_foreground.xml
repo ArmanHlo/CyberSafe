@@ -1,0 +1,14 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Neon Green Shield -->
+    <path
+        android:fillColor="#39FF14"
+        android:pathData="M54,24 C44,24 32,28 28,34 V56 C28,74 54,84 54,84 C54,84 80,74 80,56 V34 C76,28 64,24 54,24 Z" />
+    <!-- Navy Bolt cutout -->
+    <path
+        android:fillColor="#0A192F"
+        android:pathData="M58,38 L45,54 H52 L49,70 L62,48 H55 L58,38 Z" />
+</vector>
