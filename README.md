@@ -1,8 +1,4 @@
 <div align="center">
-
-<!-- BANNER / LOGO -->
-<img src="docs/banner.png" alt="PhishGuard Banner" width="100%"/>
-
 <br/>
 
 # 🛡️ PhishGuard
