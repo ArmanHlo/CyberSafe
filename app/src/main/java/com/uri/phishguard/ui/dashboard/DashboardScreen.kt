@@ -44,10 +44,13 @@ fun DashboardScreen(
 
     Scaffold(
         floatingActionButton = {
-            LargeFloatingActionButton(
+            FloatingActionButton(
                 onClick = { showQuickScanSheet = true },
                 containerColor = NeonGreen,
-                contentColor = Color.Black
+                contentColor = Color.Black,
+                shape = RoundedCornerShape(16.dp),
+                // Added padding to move the button UP so it doesn't hit the nav bar
+                modifier = Modifier.padding(bottom = 90.dp, end = 8.dp)
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Quick Scan")
             }
@@ -59,7 +62,6 @@ fun DashboardScreen(
                 .fillMaxSize()
         ) {
             item { 
-                // Removed the redundant statusBarsPadding() that was causing the blank space
                 EmergencyBanner() 
             }
             
@@ -133,7 +135,7 @@ fun DashboardScreen(
                 ScamNewsCard(news)
             }
             
-            item { Spacer(modifier = Modifier.height(100.dp)) }
+            item { Spacer(modifier = Modifier.height(120.dp)) }
         }
 
         if (showQuickScanSheet) {
