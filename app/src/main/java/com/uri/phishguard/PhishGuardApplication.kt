@@ -4,6 +4,7 @@ import android.app.Application
 import com.uri.phishguard.data.local.PhishDatabase
 import com.uri.phishguard.data.remote.GeminiHelper
 import com.uri.phishguard.data.remote.HibpApi
+import com.uri.phishguard.data.remote.RealityDefenderApi
 import com.uri.phishguard.data.remote.VirusTotalApi
 import com.uri.phishguard.data.repository.AuthRepository
 import com.uri.phishguard.data.repository.DatabaseRepository
@@ -28,15 +29,31 @@ class PhishGuardApplication : Application() {
         val database = PhishDatabase.getDatabase(this)
         databaseRepository = DatabaseRepository(database.scanDao())
 
-        val retrofit = Retrofit.Builder()
+        // VirusTotal & HIBP use the same/similar base or different ones? 
+        // VirusTotal: https://www.virustotal.com/api/v3/
+        // HIBP: https://haveibeenpwned.com/api/v3/
+        // Reality Defender: https://api.realitydefender.com/v1/ (Example base URL)
+
+        val vtRetrofit = Retrofit.Builder()
             .baseUrl("https://www.virustotal.com/api/v3/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
         
-        val vtApi = retrofit.create(VirusTotalApi::class.java)
-        val hibpApi = retrofit.create(HibpApi::class.java)
+        val hibpRetrofit = Retrofit.Builder()
+            .baseUrl("https://haveibeenpwned.com/api/v3/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
 
-        networkRepository = NetworkRepository(vtApi, hibpApi)
+        val rdRetrofit = Retrofit.Builder()
+            .baseUrl("https://api.realitydefender.com/v1/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        val vtApi = vtRetrofit.create(VirusTotalApi::class.java)
+        val hibpApi = hibpRetrofit.create(HibpApi::class.java)
+        val rdApi = rdRetrofit.create(RealityDefenderApi::class.java)
+
+        networkRepository = NetworkRepository(vtApi, hibpApi, rdApi)
         authRepository = AuthRepository()
         quotaManager = QuotaManager(this)
         geminiHelper = GeminiHelper(quotaManager)

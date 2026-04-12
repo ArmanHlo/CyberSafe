@@ -1,18 +1,18 @@
+# Android Studio / IntelliJ files
 *.iml
 .gradle
 /local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
+/.idea/
 .DS_Store
-/build
 /captures
 .externalNativeBuild
 .cxx
-local.properties
 
-# Firebase configuration
+# Build folders (IMPORTANT: ignores all build folders in the project)
+build/
+app/build/
+**/build/
+
+# Firebase configuration (Secrets)
 app/google-services.json
+local.properties

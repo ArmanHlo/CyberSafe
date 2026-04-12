@@ -2,7 +2,6 @@ package com.uri.phishguard.ui.toolkit
 
 import android.content.Context
 import android.content.pm.ApplicationInfo
-import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -17,7 +16,8 @@ data class AppPermissionInfo(
     val packageName: String,
     val icon: android.graphics.drawable.Drawable?,
     val dangerousPermissions: List<String>,
-    val riskLevel: RiskLevel
+    val riskLevel: RiskLevel,
+    val riskScore: Int
 )
 
 enum class RiskLevel {
@@ -34,16 +34,17 @@ class PermissionViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(PermissionUiState())
     val uiState = _uiState.asStateFlow()
 
-    private val sensitivePermissions = listOf(
-        "android.permission.READ_SMS",
-        "android.permission.RECEIVE_SMS",
-        "android.permission.RECORD_AUDIO",
-        "android.permission.CAMERA",
-        "android.permission.ACCESS_FINE_LOCATION",
-        "android.permission.ACCESS_COARSE_LOCATION",
-        "android.permission.READ_CONTACTS",
-        "android.permission.READ_CALL_LOG",
-        "android.permission.PROCESS_OUTGOING_CALLS"
+    // Weighted permissions for a more "Premium" analysis
+    private val permissionWeights = mapOf(
+        "android.permission.READ_SMS" to 40,
+        "android.permission.RECEIVE_SMS" to 40,
+        "android.permission.READ_CALL_LOG" to 35,
+        "android.permission.READ_CONTACTS" to 30,
+        "android.permission.RECORD_AUDIO" to 30,
+        "android.permission.CAMERA" to 25,
+        "android.permission.ACCESS_FINE_LOCATION" to 20,
+        "android.permission.ACCESS_COARSE_LOCATION" to 10,
+        "android.permission.PROCESS_OUTGOING_CALLS" to 35
     )
 
     fun scanApps(context: Context) {
@@ -55,17 +56,25 @@ class PermissionViewModel : ViewModel() {
                 
                 installedApps.filter { packageInfo ->
                     val appInfo = packageInfo.applicationInfo
+                    // Filter for user-installed apps only
                     appInfo != null && (appInfo.flags and ApplicationInfo.FLAG_SYSTEM) == 0 
                 }.map { packageInfo ->
                     val appInfo = packageInfo.applicationInfo!!
                     val appName = pm.getApplicationLabel(appInfo).toString()
-                    val dangerous = packageInfo.requestedPermissions?.filter { 
-                        sensitivePermissions.contains(it) 
-                    } ?: emptyList()
                     
+                    val requested = packageInfo.requestedPermissions ?: emptyArray()
+                    val dangerous = requested.filter { permissionWeights.containsKey(it) }
+                    
+                    // Calculate a nuanced risk score
+                    var score = 0
+                    dangerous.forEach { perm ->
+                        score += permissionWeights[perm] ?: 0
+                    }
+
+                    // Refined Risk Leveling
                     val risk = when {
-                        dangerous.size >= 3 -> RiskLevel.HIGH
-                        dangerous.isNotEmpty() -> RiskLevel.MEDIUM
+                        score >= 60 -> RiskLevel.HIGH
+                        score >= 20 -> RiskLevel.MEDIUM
                         else -> RiskLevel.LOW
                     }
                     
@@ -74,9 +83,10 @@ class PermissionViewModel : ViewModel() {
                         packageName = packageInfo.packageName,
                         icon = pm.getApplicationIcon(appInfo),
                         dangerousPermissions = dangerous,
-                        riskLevel = risk
+                        riskLevel = risk,
+                        riskScore = score
                     )
-                }.sortedByDescending { it.riskLevel }
+                }.sortedByDescending { it.riskScore }
             }
             _uiState.value = PermissionUiState(apps = apps, isLoading = false)
         }

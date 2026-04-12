@@ -1,9 +1,10 @@
 package com.uri.phishguard.ui.toolkit
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Warning
@@ -11,11 +12,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.graphics.drawable.toBitmap
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -90,8 +94,22 @@ fun AppRiskItem(app: AppPermissionInfo) {
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                // Simplified icon handling
-                Box(modifier = Modifier.size(40.dp).background(MaterialTheme.colorScheme.surfaceVariant))
+                // Show the real app icon
+                if (app.icon != null) {
+                    Image(
+                        bitmap = app.icon.toBitmap().asImageBitmap(),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(44.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                    )
+                } else {
+                    Surface(
+                        modifier = Modifier.size(44.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        shape = RoundedCornerShape(8.dp)
+                    ) {}
+                }
                 
                 Spacer(modifier = Modifier.width(12.dp))
                 
