@@ -35,7 +35,7 @@ class ViewModelFactory(private val application: PhishGuardApplication) : ViewMod
                 UrlScannerViewModel(application.geminiHelper, application.networkRepository, application.databaseRepository, application.quotaManager) as T
             }
             modelClass.isAssignableFrom(DeepfakeViewModel::class.java) -> {
-                DeepfakeViewModel(application.geminiHelper, application.databaseRepository, application.quotaManager) as T
+                DeepfakeViewModel(application.geminiHelper, application.networkRepository, application.databaseRepository, application.quotaManager) as T
             }
             modelClass.isAssignableFrom(PasswordViewModel::class.java) -> {
                 PasswordViewModel(application.networkRepository, application.databaseRepository) as T
