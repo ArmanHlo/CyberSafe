@@ -5,7 +5,7 @@ import android.util.Log
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.content
 import com.google.ai.client.generativeai.type.generationConfig
-import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.uri.phishguard.BuildConfig
 import com.uri.phishguard.data.model.ImageScanResult
 import com.uri.phishguard.data.model.TextScanResult
@@ -15,7 +15,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class GeminiHelper(private val quotaManager: QuotaManager) {
-    private val gson = Gson()
+    private val gson = GsonBuilder().setLenient().create()
     private val TAG = "GeminiHelper"
     
     private val config = generationConfig {
@@ -67,18 +67,19 @@ class GeminiHelper(private val quotaManager: QuotaManager) {
     suspend fun analyzeScamText(text: String): TextScanResult? = withContext(Dispatchers.IO) {
         val prompt = """
             Analyze the message below for scams and phishing.
-            Respond ONLY with a valid JSON object.
+            You MUST return ONLY a JSON object. No preamble, no markdown formatting (like ```json), and no closing remarks.
+            Ensure all arrays and objects are properly closed.
             
             Message: $text
 
-            JSON Structure:
+            Expected JSON Format:
             {
               "verdict": "SAFE" | "SUSPICIOUS" | "DANGEROUS",
               "confidence": 0-100,
               "scam_type": "string",
-              "red_flags": ["list"],
-              "safe_indicators": ["list"],
-              "psychological_tricks": ["list"],
+              "red_flags": ["list of strings"],
+              "safe_indicators": ["list of strings"],
+              "psychological_tricks": ["list of strings"],
               "what_they_want": "string",
               "action_to_take": "string",
               "report_to": "string",
