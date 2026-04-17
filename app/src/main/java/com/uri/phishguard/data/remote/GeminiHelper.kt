@@ -12,28 +12,55 @@ import com.uri.phishguard.data.model.TextScanResult
 import com.uri.phishguard.data.model.UrlScanResult
 import com.uri.phishguard.util.QuotaManager
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 
 class GeminiHelper(private val quotaManager: QuotaManager) {
     private val gson = GsonBuilder().setLenient().create()
     private val TAG = "GeminiHelper"
+    private val MAX_RETRIES = 3
+    private val INITIAL_DELAY = 1000L // 1 second
     
     private val config = generationConfig {
         responseMimeType = "application/json"
     }
 
     private val primaryModel = GenerativeModel(
-        modelName = "gemini-2.5-flash",
+        modelName = "gemini-1.5-flash",
         apiKey = BuildConfig.GEMINI_API_KEY,
         generationConfig = config
     )
 
+    private suspend fun <T> retryIO(
+        times: Int = MAX_RETRIES,
+        initialDelay: Long = INITIAL_DELAY,
+        block: suspend () -> T?
+    ): T? {
+        var currentDelay = initialDelay
+        repeat(times - 1) {
+            try {
+                val result = block()
+                if (result != null) return result
+            } catch (e: Exception) {
+                Log.e(TAG, "Retry failed: ${e.message}")
+            }
+            delay(currentDelay)
+            currentDelay *= 2
+        }
+        return try { block() } catch (e: Exception) { 
+            Log.e(TAG, "Final attempt failed: ${e.message}")
+            null 
+        }
+    }
+
     private suspend fun generateString(prompt: String): String? {
-        return try {
-            primaryModel.generateContent(prompt).text
-        } catch (e: Exception) {
-            Log.e(TAG, "Model failed: ${e.message}")
-            null
+        return retryIO {
+            try {
+                primaryModel.generateContent(prompt).text
+            } catch (e: Exception) {
+                Log.e(TAG, "Model failed: ${e.message}")
+                null
+            }
         }
     }
 
@@ -42,11 +69,13 @@ class GeminiHelper(private val quotaManager: QuotaManager) {
             image(bitmap)
             text(promptText)
         }
-        return try {
-            primaryModel.generateContent(inputContent).text
-        } catch (e: Exception) {
-            Log.e(TAG, "Model with image failed: ${e.message}")
-            null
+        return retryIO {
+            try {
+                primaryModel.generateContent(inputContent).text
+            } catch (e: Exception) {
+                Log.e(TAG, "Model with image failed: ${e.message}")
+                null
+            }
         }
     }
 
