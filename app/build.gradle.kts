@@ -34,6 +34,7 @@ android {
         buildConfigField("String", "GEMINI_API_KEY", "\"${localProperties.getProperty("GEMINI_API_KEY") ?: ""}\"")
         buildConfigField("String", "VIRUSTOTAL_API_KEY", "\"${localProperties.getProperty("VIRUSTOTAL_API_KEY") ?: ""}\"")
         buildConfigField("String", "REALITY_DEFENDER_API_KEY", "\"${localProperties.getProperty("REALITY_DEFENDER_API_KEY") ?: ""}\"")
+        buildConfigField("String", "HIBP_API_KEY", "\"${localProperties.getProperty("HIBP_API_KEY") ?: ""}\"")
     }
 
     buildTypes {

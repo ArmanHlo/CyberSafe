@@ -31,7 +31,7 @@ class EmailBreachViewModel(
     fun checkEmail(email: String) {
         if (email.isBlank()) return
 
-        val hibpKey = encryptedPrefs.getApiKey(EncryptedPrefs.HIBP_KEY)
+        val hibpKey = encryptedPrefs.getApiKey(EncryptedPrefs.HIBP_KEY) ?: com.uri.phishguard.BuildConfig.HIBP_API_KEY
         if (hibpKey.isNullOrBlank()) {
             _uiState.value = _uiState.value.copy(error = "HIBP API Key missing in settings.")
             return
