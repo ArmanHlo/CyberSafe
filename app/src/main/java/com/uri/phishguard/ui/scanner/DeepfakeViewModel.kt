@@ -53,38 +53,39 @@ class DeepfakeViewModel(
 
                 val resizedBitmap = resizeBitmap(bitmap, 800)
                 
-                // 1. Try Reality Defender (via NetworkRepository)
-                val rdResult = try {
-                    val stream = ByteArrayOutputStream()
-                    resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 90, stream)
-                    val byteArray = stream.toByteArray()
-                    val requestBody = byteArray.toRequestBody("image/jpeg".toMediaTypeOrNull(), 0, byteArray.size)
-                    val part = MultipartBody.Part.createFormData("file", "image.jpg", requestBody)
-                    
-                    networkRepository.detectDeepfake(part)
-                } catch (e: Exception) {
-                    null
-                }
+                // 1. Try Gemini first
+                var scanResult = geminiHelper.analyzeImage(resizedBitmap)
 
-                val scanResult: ImageScanResult? = if (rdResult != null && rdResult.results?.isNotEmpty() == true) {
-                    // Map Reality Defender response to ImageScanResult
-                    val topResult = rdResult.results[0]
-                    ImageScanResult(
-                        verdict = when {
-                            topResult.score > 0.8 -> "DEEPFAKE_FACESWAP"
-                            topResult.score > 0.5 -> "MANIPULATED"
-                            else -> "AUTHENTIC"
-                        },
-                        confidence = (topResult.score * 100).toInt(),
-                        isRealProbability = ((1 - topResult.score) * 100).toInt(),
-                        aiGeneratedProbability = (topResult.score * 100).toInt(),
-                        deepfakeProbability = (topResult.score * 100).toInt(),
-                        simpleExplanation = "Analysis by Reality Defender: Confidence ${topResult.score}",
-                        useCaseRisk = if (topResult.score > 0.7) "HIGH" else "LOW"
-                    )
-                } else {
-                    // 2. Fallback to Gemini if Reality Defender fails or returns no results
-                    geminiHelper.analyzeImage(resizedBitmap)
+                // 2. Fallback to Reality Defender if Gemini fails
+                if (scanResult == null) {
+                    val rdResult = try {
+                        val stream = ByteArrayOutputStream()
+                        resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 90, stream)
+                        val byteArray = stream.toByteArray()
+                        val requestBody = byteArray.toRequestBody("image/jpeg".toMediaTypeOrNull(), 0, byteArray.size)
+                        val part = MultipartBody.Part.createFormData("file", "image.jpg", requestBody)
+                        
+                        networkRepository.detectDeepfake(part)
+                    } catch (e: Exception) {
+                        null
+                    }
+
+                    if (rdResult != null && rdResult.results?.isNotEmpty() == true) {
+                        val topResult = rdResult.results[0]
+                        scanResult = ImageScanResult(
+                            verdict = when {
+                                topResult.score > 0.8 -> "DEEPFAKE_FACESWAP"
+                                topResult.score > 0.5 -> "MANIPULATED"
+                                else -> "AUTHENTIC"
+                            },
+                            confidence = (topResult.score * 100).toInt(),
+                            isRealProbability = ((1 - topResult.score) * 100).toInt(),
+                            aiGeneratedProbability = (topResult.score * 100).toInt(),
+                            deepfakeProbability = (topResult.score * 100).toInt(),
+                            simpleExplanation = "Analysis by Reality Defender: Confidence ${topResult.score}",
+                            useCaseRisk = if (topResult.score > 0.7) "HIGH" else "LOW"
+                        )
+                    }
                 }
 
                 if (scanResult != null) {
